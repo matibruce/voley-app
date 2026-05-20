@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Estadísticas Voley</title>
+    <style>
+        /* Estilos para que parezca una App de celular */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            user-select: none;
+        }
+
+        h2 { margin: 5px 0; color: #333; }
+
+        /* Contenedor del Marcador */
+        .marcador-container {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 400px;
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .equipo-box {
+            text-align: center;
+            flex: 1;
+        }
+
+        .nombre-equipo {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        .puntos {
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: #1e88e5;
+            margin: 5px 0;
+        }
+
+        /* Botones grandes para la cancha */
+        .btn-punto {
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 85%;
+        }
+
+        /* Sección de Estadísticas Rápidas */
+        .stats-container {
+            width: 100%;
+            max-width: 400px;
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .stats-titulo {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #444;
+            border-bottom: 2px solid #f0f2f5;
+            padding-bottom: 5px;
+        }
+
+        .grupo-botones {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .btn-stat {
+            background-color: #2196f3;
+            color: white;
+            border: none;
+            padding: 15px 10px;
+            font-size: 0.9rem;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-error {
+            background-color: #e53935;
+        }
+
+        /* Historial simple abajo */
+        .historial {
+            margin-top: 20px;
+            width: 100%;
+            max-width: 400px;
+            font-size: 0.9rem;
+            color: #666;
+            background: #fff;
+            padding: 10px;
+            border-radius: 10px;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Estadísticas de Voley</h2>
+    
+    <!-- MARCADOR -->
+    <div class="marcador-container">
+        <div class="equipo-box">
+            <div class="nombre-equipo">Nuestro Equipo</div>
+            <div class="puntos" id="pts-local">0</div>
+            <button class="btn-punto" onclick="sumarPunto('local', 'Punto General')">+1 Pts</button>
+        </div>
+        
+        <div class="equipo-box">
+            <div class="nombre-equipo">Rival</div>
+            <div class="puntos" id="pts-rival">0</div>
+            <button class="btn-punto" style="background-color:#ff9800;" onclick="sumarPunto('rival', 'Punto Rival')">+1 Pts</button>
+        </div>
+    </div>
+
+    <!-- BOTONES DE ESTADÍSTICA -->
+    <div class="stats-container">
+        <div class="stats-titulo">Registrar Acción de Nuestro Equipo</div>
+        
+        <div class="grupo-botones">
+            <button class="btn-stat" onclick="sumarPunto('local', 'Ace de Saque')">♠️ Ace Saque</button>
+            <button class="btn-stat btn-error" onclick="sumarPunto('rival', 'Error de Saque')">❌ Error Saque</button>
+        </div>
+
+        <div class="grupo-botones">
+            <button class="btn-stat" onclick="sumarPunto('local', 'Punto Ataque')">🔥 Ataque Ganador</button>
+            <button class="btn-stat btn-error" onclick="sumarPunto('rival', 'Error Ataque')">❌ Error Ataque</button>
+        </div>
+
+        <div class="grupo-botones">
+            <button class="btn-stat" onclick="sumarPunto('local', 'Bloqueo')">🛑 Bloqueo Punto</button>
+            <button class="btn-stat btn-error" onclick="sumarPunto('rival', 'Error No Forzado')">⚠️ Error Red/Otros</button>
+        </div>
+    </div>
+
+    <!-- HISTORIAL -->
+    <div class="historial">
+        <strong>Últimas acciones:</strong>
+        <div id="lista-historial">El partido no comenzó.</div>
+    </div>
+
+    <script>
+        // LÓGICA EN JAVASCRIPT
+        let puntosLocal = 0;
+        let puntosRival = 0;
+        let registroAcciones = [];
+
+        function sumarPunto(equipo, accion) {
+            if (equipo === 'local') {
+                puntosLocal++;
+                document.getElementById('pts-local').innerText = puntosLocal;
+            } else {
+                puntosRival++;
+                document.getElementById('pts-rival').innerText = puntosRival;
+            }
+
+            // Guardar en el historial
+            let marcadorActual = `(${puntosLocal}-${puntosRival})`;
+            registroAcciones.unshift(`${marcadorActual} - ${accion}`);
+            
+            // Mostrar las últimas 4 acciones en pantalla
+            actualizarHistorial();
+        }
+
+        function actualizarHistorial() {
+            let contenedor = document.getElementById('lista-historial');
+            contenedor.innerHTML = registroAcciones.slice(0, 4).join('<br>');
+        }
+    </script>
+
+</body>
+</html>
